@@ -10,7 +10,6 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  
 }
 
 @layer components {

@@ -57,7 +57,7 @@ export async function searchJobs(params: {
       jobType: params.jobType,
     });
     
-    return {
+    return { 
       success: true,
       message: 'Busca realizada com sucesso! Você receberá as vagas no seu email em breve.',
       jobCount: limitedJobs.length,

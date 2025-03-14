@@ -24,7 +24,6 @@ export default function PremiumPlan() {
     setError(null);
 
     try {
-      // Call payment API
       const response = await fetch("/api/payment", {
         method: "POST",
         headers: {
@@ -43,7 +42,6 @@ export default function PremiumPlan() {
         throw new Error(data.message || "Erro ao processar pagamento");
       }
 
-      // Redirect to payment page
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
       } else {
