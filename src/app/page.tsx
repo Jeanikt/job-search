@@ -1,15 +1,17 @@
 import JobForm from "@/components/JobForm";
 import PremiumPlan from "@/components/PremiumPlan";
 import { Sparkles } from "lucide-react";
-
+import logo from "./img/icon.png";
+import Image from "next/image";
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#f0f5ff] to-[#e0ebff]">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold text-primary-900 mb-4">
-            Assistente de Busca de Vagas
+            Assistente de Busca de Vagas - Zircon
           </h1>
+          <Image src={logo} alt="Ícone de lupa" className="w-24 mx-auto mb-4" />
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Encontre as melhores oportunidades de emprego direto na sua caixa de
             entrada com nosso algoritmo avançado de busca

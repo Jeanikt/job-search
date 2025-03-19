@@ -33,9 +33,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    console.log("Recebida requisição POST para /api/search:", body);
 
     const result = searchRequestSchema.safeParse(body);
     if (!result.success) {
+      console.error("Dados inválidos:", result.error.errors);
       return NextResponse.json(
         {
           success: false,
@@ -57,10 +59,16 @@ export async function POST(request: NextRequest) {
       useCache = true,
     } = result.data;
 
+    // Verificar se o usuário é premium
+    console.log(`Verificando status premium para ${email}`);
     const isPremium = await isUserPremium(email);
+    console.log(`Usuário ${email} é premium: ${isPremium}`);
 
+    // Se não for premium, verificar se já fez busca hoje
     if (!isPremium) {
+      console.log(`Verificando se ${email} já fez busca hoje`);
       const hasSearched = await hasUserSearchedToday(email);
+      console.log(`Usuário ${email} já fez busca hoje: ${hasSearched}`);
 
       if (hasSearched) {
         return NextResponse.json(
@@ -76,9 +84,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Registrar busca e incrementar contador
+    console.log(`Registrando busca para ${email}`);
     await registerSearch(email, location, country, jobType);
     await incrementSearchCount(email);
 
+    // Realizar busca de vagas
+    console.log(`Iniciando busca de vagas para ${email}`);
     const searchResult = await enhancedSearchJobs({
       email,
       location,
@@ -91,6 +103,7 @@ export async function POST(request: NextRequest) {
     });
 
     const executionTimeTotal = Math.round(performance.now() - startTime);
+    console.log(`Busca concluída em ${executionTimeTotal}ms`);
 
     return NextResponse.json({
       ...searchResult,
@@ -121,6 +134,14 @@ export async function GET(request: NextRequest) {
     const jobType = searchParams.get("jobType") || "";
     const page = parseInt(searchParams.get("page") || "1");
     const pageSize = parseInt(searchParams.get("pageSize") || "10");
+
+    console.log("Recebida requisição GET para /api/search:", {
+      location,
+      country,
+      jobType,
+      page,
+      pageSize,
+    });
 
     if (!location || !country || !jobType) {
       return NextResponse.json(

@@ -8,15 +8,15 @@ export function extractSearchTerms(jobType: string): string[] {
     (term) => term.length > 2 && !commonWords.includes(term)
   );
 
-  const expandedTerms = new Set<string>(filteredTerms);
+  const expandedTerms = Array.from(new Set(filteredTerms));
 
   filteredTerms.forEach((term) => {
     if (synonyms[term]) {
-      synonyms[term].forEach((synonym) => expandedTerms.add(synonym));
+      synonyms[term].forEach((synonym) => expandedTerms.push(synonym));
     }
   });
 
-  return Array.from(expandedTerms);
+  return expandedTerms;
 }
 
 export async function generateSearchExpansions(
@@ -25,13 +25,17 @@ export async function generateSearchExpansions(
   const allTerms = new Set<string>(searchTerms);
 
   for (const term of searchTerms) {
+    // Adicionar variações de ortografia
     addSpellingVariations(term, allTerms);
 
+    // Adicionar sinônimos
     addSynonyms(term, allTerms);
 
+    // Adicionar termos relacionados
     addRelatedTerms(term, allTerms);
   }
 
+  // Criar combinações de termos
   const combinations = createTermCombinations(searchTerms);
   combinations.forEach((combo) => allTerms.add(combo));
 
@@ -39,26 +43,20 @@ export async function generateSearchExpansions(
 }
 
 function addSpellingVariations(term: string, termSet: Set<string>): void {
-  const accentVariations: Record<string, string[]> = {
-    a: ["a", "á", "à", "â", "ã"],
-    e: ["e", "é", "è", "ê"],
-    i: ["i", "í", "ì", "î"],
-    o: ["o", "ó", "ò", "ô", "õ"],
-    u: ["u", "ú", "ù", "û"],
-    c: ["c", "ç"],
-  };
-
+  // Variações com hífen e sem hífen
   if (term.includes("-")) {
     termSet.add(term.replace(/-/g, " "));
     termSet.add(term.replace(/-/g, ""));
   }
 
+  // Variações singular/plural
   if (term.endsWith("s")) {
     termSet.add(term.slice(0, -1));
   } else {
     termSet.add(`${term}s`);
   }
 
+  // Para termos técnicos, adicionar variações comuns
   if (techTerms.includes(term)) {
     termSet.add(`${term} developer`);
     termSet.add(`${term} desenvolvedor`);
@@ -89,7 +87,6 @@ function addRelatedTerms(term: string, termSet: Set<string>): void {
 
 function createTermCombinations(terms: string[]): string[] {
   const combinations: string[] = [];
-
   const limitedTerms = terms.slice(0, 3);
 
   for (let i = 0; i < limitedTerms.length; i++) {
@@ -185,80 +182,42 @@ const commonWords = [
 ];
 
 const techTerms = [
-  "python",
-  "java",
-  "javascript",
-  "typescript",
   "react",
   "angular",
   "vue",
+  "javascript",
+  "typescript",
   "node",
-  "express",
-  "django",
-  "flask",
-  "spring",
-  "php",
-  "laravel",
-  "ruby",
-  "rails",
+  "python",
+  "java",
   "c#",
   ".net",
-  "kotlin",
-  "swift",
+  "php",
+  "ruby",
   "go",
   "rust",
-  "scala",
+  "swift",
+  "kotlin",
+  "flutter",
   "aws",
   "azure",
   "gcp",
   "devops",
   "docker",
   "kubernetes",
-  "terraform",
-  "jenkins",
-  "git",
   "sql",
   "nosql",
   "mongodb",
   "postgresql",
-  "mysql",
-  "oracle",
-  "data",
-  "analytics",
-  "machine learning",
-  "ai",
-  "mobile",
-  "android",
-  "ios",
-  "flutter",
 ];
 
 const languageFrameworks: Record<string, string[]> = {
-  javascript: [
-    "react",
-    "vue",
-    "angular",
-    "next.js",
-    "nuxt",
-    "svelte",
-    "express",
-    "node",
-  ],
-  js: [
-    "react",
-    "vue",
-    "angular",
-    "next.js",
-    "nuxt",
-    "svelte",
-    "express",
-    "node",
-  ],
-  python: ["django", "flask", "fastapi", "pyramid", "tornado"],
-  java: ["spring", "hibernate", "struts", "jsf", "gwt"],
-  php: ["laravel", "symfony", "codeigniter", "cake", "yii", "wordpress"],
-  ruby: ["rails", "sinatra", "hanami"],
-  "c#": ["asp.net", ".net core", ".net", "xamarin", "entity framework"],
+  javascript: ["react", "vue", "angular", "next.js", "express", "node"],
+  python: ["django", "flask", "fastapi", "pyramid"],
+  java: ["spring", "hibernate", "struts", "jsf"],
+  php: ["laravel", "symfony", "codeigniter", "wordpress"],
+  ruby: ["rails", "sinatra"],
+  "c#": ["asp.net", ".net core", "xamarin"],
   frontend: ["react", "vue", "angular", "svelte", "html", "css"],
   backend: ["node", "spring", "django", "rails", "laravel", "express"],
   mobile: ["flutter", "react native", "swift", "kotlin", "xamarin"],
